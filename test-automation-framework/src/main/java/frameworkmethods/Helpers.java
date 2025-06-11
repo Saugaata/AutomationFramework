@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -29,8 +29,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import Utilities.Configuration;
-import Utilities.DriverFactory;
+import utilities.Configuration;
+import utilities.DriverFactory;
 
 public class Helpers {
 
@@ -371,74 +371,109 @@ public class Helpers {
 
     // *********************** Wait Helpers ************************ //
 
-    private WebDriverWait getWait(int timeoutInSeconds) {
-    	return new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-    }
-    
     /**
-     * Waits for an element to be visible within a specified timeout
+     * Returns a WebDriverWait object with a specified timeout
      */
-    public WebElement waitForElementToBeVisible(By locator, int timeoutInSeconds) {
-        WebDriverWait customWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-        return customWait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    private WebDriverWait getWait(int timeoutInSeconds) {
+        return new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
     }
 
     /**
-     * Waits for an element to be clickable within a specified timeout
+     * Waits for an element to become clickable
      */
     public WebElement waitForElementToBeClickable(By locator, int timeoutInSeconds) {
-        WebDriverWait customWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-        return customWait.until(ExpectedConditions.elementToBeClickable(locator));
+        return getWait(timeoutInSeconds).until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     /**
-     * Waits for a link with exact text to be clickable
+     * Waits for an element to become clickable by link text
      */
     public WebElement waitForElementToBeClickableByLinkText(String linkText, int timeoutInSeconds) {
-        WebDriverWait customWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-        return customWait.until(ExpectedConditions.elementToBeClickable(By.linkText(linkText)));
+        return getWait(timeoutInSeconds).until(ExpectedConditions.elementToBeClickable(By.linkText(linkText)));
     }
 
     /**
-     * Waits for a link with partial text to be clickable
+     * Waits for an element to become clickable by partial link text
      */
     public WebElement waitForElementToBeClickableByPartialLinkText(String partialLinkText, int timeoutInSeconds) {
-        WebDriverWait customWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-        return customWait.until(ExpectedConditions.elementToBeClickable(By.partialLinkText(partialLinkText)));
+        return getWait(timeoutInSeconds).until(ExpectedConditions.elementToBeClickable(By.partialLinkText(partialLinkText)));
     }
-    
+
     /**
-     * Waits until the element is invisible
+     * Waits for an element to become clickable by XPath
      */
-    public boolean waitForElementToBeInvisible(By locator, int timeoutInSeconds) {
+    public WebElement waitForElementToBeClickableByXPath(String xpath, int timeoutInSeconds) {
+        return getWait(timeoutInSeconds).until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+    }
+
+    /**
+     * Waits for an element to become visible
+     */
+    public WebElement waitForElementToBeVisible(By locator, int timeoutInSeconds) {
         try {
-            WebDriverWait customWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-            return customWait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
+            WebElement webElement = getWait(timeoutInSeconds)
+                    .until(ExpectedConditions.visibilityOfElementLocated(locator));
+            return webElement;
         } catch (TimeoutException e) {
-            System.err.println("Element was still visible after timeout: " + locator);
-            return false;
+            System.out.println("Element not visible in time: " + e.getMessage());
+            return null;
         }
     }
 
     /**
-     * Waits for specific text to be present in the element
+     * Waits for an element to disappear
      */
-    public boolean waitForTextToBePresentInElement(By locator, String text, int timeoutInSeconds) {
-        try {
-            WebDriverWait customWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-            return customWait.until(ExpectedConditions.textToBePresentInElementLocated(locator, text));
-        } catch (TimeoutException e) {
-            System.err.println("Text '" + text + "' not present in element: " + locator);
-            return false;
-        }
+    public boolean waitForElementToDisappear(By locator, int timeoutInSeconds) {
+        return getWait(timeoutInSeconds)
+                .until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
+    
 
     /**
      * Waits for an element to be present in the DOM (not necessarily visible)
      */
     public WebElement waitForPresenceOfElement(By locator, int timeoutInSeconds) {
-        WebDriverWait customWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-        return customWait.until(ExpectedConditions.presenceOfElementLocated(locator));
+    	return getWait(timeoutInSeconds).until(ExpectedConditions.presenceOfElementLocated(locator));
     }
+
+
+    /**
+     * Waits for specific text to be present in an element
+     */
+    public boolean waitForTextToBePresent(By locator, String text, int timeoutInSeconds) {
+        return getWait(timeoutInSeconds)
+                .until(ExpectedConditions.textToBePresentInElementLocated(locator, text));
+    }
+
+    /**
+     * Waits for an alert to be present
+     */
+    public void waitForAlertToBePresent(int timeoutInSeconds) {
+        getWait(timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
+    }
+
+    // *********************** Miscellaneous Helpers ************************ //
+
+    /**
+     * Refreshes the page
+     */
+    public void refreshPage() {
+        driver.navigate().refresh();
+    }
+
+    /**
+     * Closes the current browser instance
+     */
+    public void closeBrowser() {
+        driver.close();
+    }
+
+    /**
+     * Closes all browser instances
+     */
+    public void quitBrowser() {
+        driver.quit();
+    }
+
 
 }
