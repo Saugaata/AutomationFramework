@@ -323,11 +323,11 @@ public class Helpers {
     /**
      * Captures a screenshot and saves it to the configured path with a timestamp
      */
-    public void captureScreenshot() {
+    public void takeScreenshot(WebDriver driver, String testName) {
         try {
             File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String filename = config.get("SCREENSHOT_PATH") + File.separator + "screenshot_" + timestamp + ".png";
+            String filename = config.get("SCREENSHOT_PATH") + testName + "_" + timestamp + ".png";
             FileUtils.copyFile(srcFile, new File(filename));
             System.out.println("Screenshot saved to: " + filename);
         } catch (IOException e) {
