@@ -328,6 +328,7 @@ public class Helpers {
             File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String filename = config.get("SCREENSHOT_PATH") + testName + "_" + timestamp + ".png";
+            
             FileUtils.copyFile(srcFile, new File(filename));
             System.out.println("Screenshot saved to: " + filename);
         } catch (IOException e) {
